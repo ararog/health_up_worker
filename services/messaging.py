@@ -31,6 +31,7 @@ def send_audio(to_number, message, ai_response_id, twilio_client: Client, openai
   response = twilio_client.messages.create(
       from_=f"whatsapp:{twilio_number}",
       media_url=[f"https://healthup.loclx.io/medias/{speech_file_path}"],
+      body=message,
       to=to_number
   )
   

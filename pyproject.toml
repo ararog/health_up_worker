@@ -5,9 +5,13 @@ description = "Add your description here"
 readme = "README.md"
 requires-python = ">=3.12"
 dependencies = [
-    "kafka-python>=2.0.5",
-    "openai>=1.65.1",
-    "pydantic-ai>=0.0.30",
-    "python-decouple>=3.8",
-    "twilio>=9.4.6",
+  "kafka-python>=2.0.5",
+  "openai>=1.65.1",
+  "psycopg2>=2.9.10",
+  "pydantic-ai>=0.0.30",
+  "pydantic-ai-slim[openai]>=0.0.30",
+  "python-decouple>=3.8",
+  "sqlmodel>=0.0.23",
+  "twilio>=9.4.6",
+  "uuid7>=0.1.0",
 ]

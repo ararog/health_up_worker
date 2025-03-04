@@ -14,7 +14,7 @@ def transcribe_media(media_url, mime_type, twilio_client: Client, openai_client:
     auth=(twilio_client.account_sid, twilio_client.password), 
     stream=True
   ).raw.read()
-  filename = '{path}{sid}{ext}'.format(path=config("MEDIAS_PATH"), sid=media_sid, ext=file_extension)
+  filename = '{path}/{sid}{ext}'.format(path=config("MEDIAS_PATH"), sid=media_sid, ext=file_extension)
   with open(filename, 'wb') as fd:
     fd.write(content)
   
