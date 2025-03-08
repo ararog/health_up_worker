@@ -33,17 +33,17 @@ from services.patient import (
     add_patient,
 )
 
-logger = logging.getLogger('health_up:appointment_agent')
+logger = logging.getLogger('health_up:doctor_agent')
 logger.setLevel(logging.CRITICAL)
 
 @dataclass
-class AppointmentDependencies:
+class DoctorDependencies:
     office_id: str
-    patient_phone_number: str
+    doctor_phone_number: str
 
 system_date_time = datetime.datetime.now().strftime("%Y-%m-%dT%H:%M:%S%z")
 
-appointment_agent = Agent('openai:gpt-4o', system_prompt="""
+doctor_agent = Agent('openai:gpt-4o', system_prompt="""
                 Current date and time is: %s
                 You are a secretary in a dental office. Perform the following steps:
                 1. Use the `get_office_info` tool to retrieve office info from database.
@@ -67,52 +67,52 @@ appointment_agent = Agent('openai:gpt-4o', system_prompt="""
                 19. End the appointment by saying: See you soon!
               """ % system_date_time)
 
-@appointment_agent.tool
-def get_office_info(ctx: RunContext[AppointmentDependencies]) -> Office:
+@doctor_agent.tool
+def get_office_info(ctx: RunContext[DoctorDependencies]) -> Office:
     logger.info("Get office info...")
     return find_office_by_id(ctx.deps.office_id)
 
-@appointment_agent.tool
-def list_doctors(ctx: RunContext[AppointmentDependencies]) -> list[Doctor]:
+@doctor_agent.tool
+def list_doctors(ctx: RunContext[DoctorDependencies]) -> list[Doctor]:
     logger.info("Get office doctors...")
     return find_doctors_by_office_id(ctx.deps.office_id)
 
-@appointment_agent.tool
-def list_specialities(ctx: RunContext[AppointmentDependencies]) -> list[Speciality]:
+@doctor_agent.tool
+def list_specialities(ctx: RunContext[DoctorDependencies]) -> list[Speciality]:
     logger.info("Get office specialists...")
     return find_specilities_by_office_id(ctx.deps.office_id)
   
-@appointment_agent.tool
-def list_appointments(ctx: RunContext[AppointmentDependencies]) -> list[Appointment]:
+@doctor_agent.tool
+def list_appointments(ctx: RunContext[DoctorDependencies]) -> list[Appointment]:
     logger.info("Listing appointments...")
     return list_existing_appointments(ctx.deps.office_id)
 
-@appointment_agent.tool
-def get_doctor(ctx: RunContext[AppointmentDependencies], doctor_name: str) -> Patient:
+@doctor_agent.tool
+def get_doctor(ctx: RunContext[DoctorDependencies], doctor_name: str) -> Patient:
     logger.info("Get doctor...")
     return find_doctor_by_name(
       ctx.deps.office_id, 
       doctor_name
     )
 
-@appointment_agent.tool
-def get_patient(ctx: RunContext[AppointmentDependencies]) -> Patient:
+@doctor_agent.tool
+def get_patient(ctx: RunContext[DoctorDependencies]) -> Patient:
     logger.info("Get patient...")
     return find_patient(
       ctx.deps.office_id, 
       ctx.deps.patient_phone_number
     )
 
-@appointment_agent.tool
-def get_appointment(ctx: RunContext[AppointmentDependencies]) -> Appointment:
+@doctor_agent.tool
+def get_appointment(ctx: RunContext[DoctorDependencies]) -> Appointment:
     logger.info("Get appointment...")
     return find_appointment(
       ctx.deps.office_id, 
       ctx.deps.patient_phone_number
     )
   
-@appointment_agent.tool
-def create_patient(ctx: RunContext[AppointmentDependencies], 
+@doctor_agent.tool
+def create_patient(ctx: RunContext[DoctorDependencies], 
                    patient: Patient) -> Patient:
     patient.id = uuid7str()
     patient.phone_number = ctx.deps.patient_phone_number
@@ -120,13 +120,13 @@ def create_patient(ctx: RunContext[AppointmentDependencies],
     add_patient(patient)
     return patient
 
-@appointment_agent.tool_plain
+@doctor_agent.tool_plain
 def cancel_appointment(appointment: Appointment) -> bool:
     logger.info("Canceling appointment: ", appointment)
     return delete_appointment(appointment)
   
-@appointment_agent.tool
-def create_appointment(ctx: RunContext[AppointmentDependencies], 
+@doctor_agent.tool
+def create_appointment(ctx: RunContext[DoctorDependencies], 
                        appointment: Appointment, doctor_id) -> Appointment:
     logger.info("Creating appointment: ", appointment)
     appointment.id = uuid7str()

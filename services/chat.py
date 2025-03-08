@@ -29,7 +29,7 @@ def get_conversation_messages(office_id: str, from_number: str) -> list[ModelMes
         statement = select(ChatMessage)
         statement = statement.where(ChatMessage.phone_number == from_number)
         statement = statement.where(ChatMessage.timestamp < actual_date_time)
-        statement = statement.limit(10)
+        statement = statement.limit(50)
         statement = statement.order_by(ChatMessage.timestamp.asc())
         results = session.exec(statement)
         

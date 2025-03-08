@@ -14,6 +14,21 @@ from agents.appointment_agent import (
   AppointmentDependencies
 )
 
+from agents.doctor_agent import (
+  doctor_agent,
+  DoctorDependencies
+)
+
+from agents.manager_agent import (
+  manager_agent,
+  ManagerDependencies
+)
+
+from agents.owner_agent import (
+  owner_agent,
+  OwnerDependencies
+)
+
 from models import (
     ChatMessage,
 )
@@ -81,11 +96,20 @@ def handle_message(message):
   office = find_office_by_phone_number(office_phone_number)
   contact = find_contact_by_phone_number(office.id, contact_phone_number)
   
+  response = None
   messages = get_conversation_messages(office.id, contact_phone_number)
-
-  if contact is None and contact.type == 'patient':        
+  if contact is None or contact.kind == 'patient':        
     deps = AppointmentDependencies(office_id=office.id, patient_phone_number=contact_phone_number)    
     response = appointment_agent.run_sync(content, message_history=messages, deps=deps)
+  elif contact.kind == 'doctor':
+    deps = DoctorDependencies(office_id=office.id, doctor_phone_number=contact_phone_number)
+    response = doctor_agent.run_sync(content, message_history=messages, deps=deps)
+  elif contact.kind == 'manager':
+    deps = ManagerDependencies(office_id=office.id, manager_phone_number=contact_phone_number)
+    response = manager_agent.run_sync(content, message_history=messages, deps=deps)
+  elif contact.kind == 'owner':
+    deps = OwnerDependencies(office_id=office.id, owner_phone_number=contact_phone_number)
+    response = owner_agent.run_sync(content, message_history=messages, deps=deps)
   
   ai_message = add_message_to_conversation(
     office.id, contact_phone_number, response.new_messages_json())

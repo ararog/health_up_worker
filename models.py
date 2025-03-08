@@ -1,5 +1,5 @@
 from sqlmodel import Field, SQLModel, select
-from sqlalchemy import union_all
+from sqlalchemy import union_all, literal_column
 from sqlalchemy.orm import registry
 from sqlalchemy_utils import create_materialized_view
 
@@ -14,19 +14,6 @@ class Office(SQLModel, table=True):
     opening_hours: str
     maps_link: str
     reviews: str
-
-class Product(SQLModel, table=True):
-    id: str | None = Field(primary_key=True)
-    name: str
-    description: str
-    price: float
-    office_id: str | None = Field(default=None, foreign_key="office.id")
-
-class Inventory(SQLModel, table=True):
-    id: str | None = Field(primary_key=True)
-    quantity: int
-    product_id: str | None = Field(default=None, foreign_key="product.id")
-    office_id: str | None = Field(default=None, foreign_key="office.id")
 
 class Speciality(SQLModel, table=True):
     id: str | None = Field(primary_key=True)
@@ -109,27 +96,32 @@ class Contact(SQLModel):
     id: str
     phone_number: str
     office_id: str
+    kind: str
     
 selectable = union_all(
         select(
             Patient.id,
             Patient.phone_number,
             Patient.office_id,
+            literal_column("'patient'").label("kind")
         ),
         select(
             Doctor.id,
             Doctor.phone_number,
             Doctor.office_id,
+            literal_column("'doctor'").label("kind")
         ),
         select(
             Manager.id,
             Manager.phone_number,
             Manager.office_id,
+            literal_column("'manager'").label("kind")
         ),
         select(
             Owner.id,
             Owner.phone_number,
             Owner.office_id,
+            literal_column("'owner'").label("kind")
         )
     )    
 
