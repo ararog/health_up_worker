@@ -1,5 +1,4 @@
 import datetime
-from uuid_extensions import uuid7str
 from database import engine
 from sqlmodel import (
     select,
@@ -7,11 +6,12 @@ from sqlmodel import (
 )
 from models import (
     Appointment, 
+    DoctorAppointment,
     Office, 
     Patient
 )
     
-def list_existing_appointments(office_id) -> list[Appointment]:
+def list_office_appointments(office_id) -> list[Appointment]:
     with Session(engine) as session:
         actual_date_time = datetime.datetime.now().strftime("%Y-%m-%dT%H:%M:%S%z")
         statement = select(Appointment)
@@ -25,15 +25,36 @@ def list_existing_appointments(office_id) -> list[Appointment]:
             appointments.extend(appointment)
 
         return appointments
+
+def list_doctor_appointments(doctor_id) -> list[DoctorAppointment]:
+    with Session(engine) as session:
+        actual_date_time = datetime.datetime.now().strftime("%Y-%m-%dT%H:%M:%S%z")
+        statement = select(Appointment, Patient).join(Patient)
+        statement = statement.where(Appointment.date >= actual_date_time)
+        statement = statement.where(Appointment.doctor_id == doctor_id)
+        results = session.exec(statement)
+        
+        appointments: list[DoctorAppointment] = []
+        for appointment, patient in results:
+            appointments.extend(
+              DoctorAppointment(
+                patient_id=patient.id, 
+                patient_name=patient.name, 
+                date=appointment.date, 
+                time=appointment.time
+              )
+            )
+
+        return appointments
     
-def find_appointment(office_id, phone_number) -> Patient: 
+def find_appointment(office_id, patient_id) -> Patient: 
     with Session(engine) as session:
         actual_date_time = datetime.datetime.now().strftime("%Y-%m-%dT%H:%M:%S%z")
         statement = select(Appointment, Patient, Office)
         statement = statement.where(Appointment.office_id == office_id)
         statement = statement.where(Appointment.patient_id == Patient.id)
         statement = statement.where(Appointment.date > actual_date_time)
-        statement = statement.where(Patient.phone_number == phone_number)
+        statement = statement.where(Patient.id == patient_id)
         results = session.exec(statement)
         
         next_appointment = results.first()
@@ -41,15 +62,8 @@ def find_appointment(office_id, phone_number) -> Patient:
             return next_appointment[0]
         return None
           
-def add_appointment(appointment, phone_number) -> Appointment: 
+def add_appointment(appointment) -> Appointment: 
     with Session(engine) as session:
-        statement = select(Patient)
-        statement = statement.where(Patient.phone_number == phone_number)
-        results = session.exec(statement)
-        patient = results.one_or_none()
-        if patient:
-            appointment.patient_id = patient.id
-
         session.add(appointment)
         session.commit()
         return appointment

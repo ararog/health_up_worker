@@ -1,36 +1,29 @@
 import datetime
 import logging
 from dataclasses import dataclass
-from uuid_extensions import uuid7str
 from pydantic_ai import Agent, RunContext
 from models import (
-    Office,
     Appointment,
+    DoctorAppointment,
     Patient,
-    Doctor,
-    Speciality,
 )
 
-from services.speciality import find_specilities_by_office_id
 from services.doctor import (
-  find_doctor_by_name,
-  find_doctors_by_office_id
+  find_doctor_by_id,
 )
 
-from services.office import (
-  find_office_by_id,
+from services.patient import (
+  find_patient_history,
 )
 
 from services.appointment import (
-    list_existing_appointments,
     find_appointment,
-    add_appointment,
-    delete_appointment
+    delete_appointment,
+    list_doctor_appointments,
 )
 
 from services.patient import (
     find_patient,
-    add_patient,
 )
 
 logger = logging.getLogger('health_up:doctor_agent')
@@ -39,97 +32,51 @@ logger.setLevel(logging.CRITICAL)
 @dataclass
 class DoctorDependencies:
     office_id: str
+    doctor_id: str
     doctor_phone_number: str
 
 system_date_time = datetime.datetime.now().strftime("%Y-%m-%dT%H:%M:%S%z")
 
 doctor_agent = Agent('openai:gpt-4o', system_prompt="""
                 Current date and time is: %s
-                You are a secretary in a dental office. Perform the following steps:
-                1. Use the `get_office_info` tool to retrieve office info from database.
-                2. Use the `list_specialties` tool to retrieve specialties from database.
-                3. Use the `list_doctors` tool to retrieve doctors from database.
-                4. Use the `cancel_appointment` tool to cancel an appointment.
-                4. When greeting the patient, use the `get_patient` tool to retrieve patient from database.
-                5. When greeting the patient, use the `get_appointment` tool to retrieve existing appointment from database. 
-                6. If there is an existing appointment, say: Hello, welcome back. You have an scheduled existing appointment, do you want to reschedule or cancel the appointment?
-                7. If there is no existing appointment, say: Hello, welcome to the office. How may I help you today?
-                8. If the patient says they want to make an appointment and you don't know their name, ask for their name.
-                9. If the patient gives their name, use the `create_patient` tool to create a new patient.
-                11. Show numbered list of doctors by name.
-                12. Ask the patient to select a doctor by number.
-                13. If patient choose a doctor, extract doctor id.
-                14. Use the `list_appointments` tool to get a list of office existing appointments.
-                15. Based on a list of existing appointments, suggest a numbered list of 10 available dates and hours for the next two weeks to the patient.
-                16. Ask the patient to select a date and time by number.
-                17. If the patient confirms, extract appointment.
-                18. Use the `create_appointment` tool to schedule the appointment.
-                19. End the appointment by saying: See you soon!
+                Date format is: DD/MM/YYYY
+                You are a doctor secretary in a dental office. Perform the following steps:
+                1. Use the `get_doctor` tool to retrieve doctor info from database.
+                2. When greeting doctor, please greet doctor by his name. How can I help you? Show a list of available commands:
+                    1. List appointments
+                3. Use the `list_appointments` tool to get a list of doctor existing appointments.
+                4. If doctor says he wants to see his appointments, show numbered list of doctor appointments in the following format: <time> - <patient_name>
+                5. Ask the doctor to select a appointment by number.
+                6. If doctor choose an appointment, extract patient id.
+                7. Ask doctor if he wants to see patient history.
+                8. If yes, use the `get_patient_history` tool to retrieve patient history from database.
+                9. Show list of patient history in the following format:
+                    - Patient: <patient_name>
+                    - Date: <date_time>
+                    - Description: <description>
               """ % system_date_time)
 
 @doctor_agent.tool
-def get_office_info(ctx: RunContext[DoctorDependencies]) -> Office:
-    logger.info("Get office info...")
-    return find_office_by_id(ctx.deps.office_id)
-
-@doctor_agent.tool
-def list_doctors(ctx: RunContext[DoctorDependencies]) -> list[Doctor]:
-    logger.info("Get office doctors...")
-    return find_doctors_by_office_id(ctx.deps.office_id)
-
-@doctor_agent.tool
-def list_specialities(ctx: RunContext[DoctorDependencies]) -> list[Speciality]:
-    logger.info("Get office specialists...")
-    return find_specilities_by_office_id(ctx.deps.office_id)
-  
-@doctor_agent.tool
-def list_appointments(ctx: RunContext[DoctorDependencies]) -> list[Appointment]:
+def list_appointments(ctx: RunContext[DoctorDependencies]) -> list[DoctorAppointment]:
     logger.info("Listing appointments...")
-    return list_existing_appointments(ctx.deps.office_id)
+    return list_doctor_appointments(ctx.deps.doctor_id)
 
 @doctor_agent.tool
-def get_doctor(ctx: RunContext[DoctorDependencies], doctor_name: str) -> Patient:
+def get_doctor(ctx: RunContext[DoctorDependencies]) -> Patient:
     logger.info("Get doctor...")
-    return find_doctor_by_name(
-      ctx.deps.office_id, 
-      doctor_name
+    return find_doctor_by_id(
+      ctx.deps.doctor_id, 
     )
-
-@doctor_agent.tool
-def get_patient(ctx: RunContext[DoctorDependencies]) -> Patient:
-    logger.info("Get patient...")
-    return find_patient(
-      ctx.deps.office_id, 
-      ctx.deps.patient_phone_number
-    )
-
-@doctor_agent.tool
-def get_appointment(ctx: RunContext[DoctorDependencies]) -> Appointment:
-    logger.info("Get appointment...")
-    return find_appointment(
-      ctx.deps.office_id, 
-      ctx.deps.patient_phone_number
+    
+    
+@doctor_agent.tool_plain
+def get_patient_history(patient_id) -> Patient:
+    logger.info("Get patient history...")
+    return find_patient_history(
+      patient_id
     )
   
-@doctor_agent.tool
-def create_patient(ctx: RunContext[DoctorDependencies], 
-                   patient: Patient) -> Patient:
-    patient.id = uuid7str()
-    patient.phone_number = ctx.deps.patient_phone_number
-    patient.office_id = ctx.deps.office_id
-    add_patient(patient)
-    return patient
-
 @doctor_agent.tool_plain
 def cancel_appointment(appointment: Appointment) -> bool:
     logger.info("Canceling appointment: ", appointment)
     return delete_appointment(appointment)
-  
-@doctor_agent.tool
-def create_appointment(ctx: RunContext[DoctorDependencies], 
-                       appointment: Appointment, doctor_id) -> Appointment:
-    logger.info("Creating appointment: ", appointment)
-    appointment.id = uuid7str()
-    appointment.doctor_id = doctor_id
-    add_appointment(appointment, ctx.deps.patient_phone_number)
-    return appointment

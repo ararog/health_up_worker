@@ -22,7 +22,7 @@ from services.office import (
 )
 
 from services.appointment import (
-    list_existing_appointments,
+    list_office_appointments,
     find_appointment,
     add_appointment,
     delete_appointment
@@ -39,6 +39,7 @@ logger.setLevel(logging.CRITICAL)
 @dataclass
 class AppointmentDependencies:
     office_id: str
+    patient_id: str
     patient_phone_number: str
 
 system_date_time = datetime.datetime.now().strftime("%Y-%m-%dT%H:%M:%S%z")
@@ -56,15 +57,16 @@ appointment_agent = Agent('openai:gpt-4o', system_prompt="""
                 7. If there is no existing appointment, say: Hello, welcome to the office. How may I help you today?
                 8. If the patient says they want to make an appointment and you don't know their name, ask for their name.
                 9. If the patient gives their name, use the `create_patient` tool to create a new patient.
-                11. Show numbered list of doctors by name.
-                12. Ask the patient to select a doctor by number.
-                13. If patient choose a doctor, extract doctor id.
-                14. Use the `list_appointments` tool to get a list of office existing appointments.
-                15. Based on a list of existing appointments, suggest a numbered list of 10 available dates and hours for the next two weeks to the patient.
-                16. Ask the patient to select a date and time by number.
-                17. If the patient confirms, extract appointment.
-                18. Use the `create_appointment` tool to schedule the appointment.
-                19. End the appointment by saying: See you soon!
+                11. Extract patient id.
+                12. Show numbered list of doctors by name.
+                13. Ask the patient to select a doctor by number.
+                14. If patient choose a doctor, extract doctor id.
+                15. Use the `list_appointments` tool to get a list of office existing appointments.
+                16. Based on a list of existing appointments, suggest a numbered list of 10 available dates and hours for the next two weeks to the patient.
+                17. Ask the patient to select a date and time by number.
+                18. If the patient confirms, extract appointment.
+                19. Use the `create_appointment` tool to schedule the appointment.
+                20. End the appointment by saying: See you soon!
               """ % system_date_time)
 
 @appointment_agent.tool
@@ -85,7 +87,7 @@ def list_specialities(ctx: RunContext[AppointmentDependencies]) -> list[Speciali
 @appointment_agent.tool
 def list_appointments(ctx: RunContext[AppointmentDependencies]) -> list[Appointment]:
     logger.info("Listing appointments...")
-    return list_existing_appointments(ctx.deps.office_id)
+    return list_office_appointments(ctx.deps.office_id)
 
 @appointment_agent.tool
 def get_doctor(ctx: RunContext[AppointmentDependencies], doctor_name: str) -> Patient:
@@ -100,7 +102,7 @@ def get_patient(ctx: RunContext[AppointmentDependencies]) -> Patient:
     logger.info("Get patient...")
     return find_patient(
       ctx.deps.office_id, 
-      ctx.deps.patient_phone_number
+      ctx.deps.patient_id
     )
 
 @appointment_agent.tool
@@ -108,7 +110,7 @@ def get_appointment(ctx: RunContext[AppointmentDependencies]) -> Appointment:
     logger.info("Get appointment...")
     return find_appointment(
       ctx.deps.office_id, 
-      ctx.deps.patient_phone_number
+      ctx.deps.patient_id
     )
   
 @appointment_agent.tool
@@ -125,11 +127,12 @@ def cancel_appointment(appointment: Appointment) -> bool:
     logger.info("Canceling appointment: ", appointment)
     return delete_appointment(appointment)
   
-@appointment_agent.tool
-def create_appointment(ctx: RunContext[AppointmentDependencies], 
-                       appointment: Appointment, doctor_id) -> Appointment:
+@appointment_agent.tool_plain
+def create_appointment(appointment: Appointment, 
+                       doctor_id, patient_id) -> Appointment:
     logger.info("Creating appointment: ", appointment)
     appointment.id = uuid7str()
     appointment.doctor_id = doctor_id
-    add_appointment(appointment, ctx.deps.patient_phone_number)
+    appointment.patient_id = patient_id
+    add_appointment(appointment)
     return appointment

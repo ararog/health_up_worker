@@ -90,39 +90,72 @@ def handle_message(message):
       mime_type = message["media_type"]
       content = transcribe_media(media_url, media_path, mime_type, twilio_client, openai_client)
   
-  office_phone_number = message["to_number"].split(':')[1]
-  contact_phone_number = message["from_number"].split(':')[1]
+  office_phone_number = message["to_number"]
+  if ':' in office_phone_number:
+      office_phone_number = office_phone_number.split(':')[1]
+  else:
+      return
+  contact_phone_number = message["from_number"]
+  if ':' in contact_phone_number:
+      contact_phone_number = contact_phone_number.split(':')[1]
+  else:
+      return
   
   office = find_office_by_phone_number(office_phone_number)
   contact = find_contact_by_phone_number(office.id, contact_phone_number)
   
+  print(f"Received contact: {contact}")
+  
   response = None
   messages = get_conversation_messages(office.id, contact_phone_number)
   if contact is None or contact.kind == 'patient':        
-    deps = AppointmentDependencies(office_id=office.id, patient_phone_number=contact_phone_number)    
-    response = appointment_agent.run_sync(content, message_history=messages, deps=deps)
+    deps = AppointmentDependencies(
+      office_id=office.id, 
+      patient_id = None if contact is None else contact.id,
+      patient_phone_number=contact_phone_number)    
+    response = appointment_agent.run_sync(content, 
+      message_history=messages, 
+      deps=deps)
   elif contact.kind == 'doctor':
-    deps = DoctorDependencies(office_id=office.id, doctor_phone_number=contact_phone_number)
-    response = doctor_agent.run_sync(content, message_history=messages, deps=deps)
+    deps = DoctorDependencies(
+      office_id=office.id, 
+      doctor_id=contact.id, 
+      doctor_phone_number=contact_phone_number)
+    response = doctor_agent.run_sync(
+      content, 
+      message_history=messages, 
+      deps=deps)
   elif contact.kind == 'manager':
-    deps = ManagerDependencies(office_id=office.id, manager_phone_number=contact_phone_number)
-    response = manager_agent.run_sync(content, message_history=messages, deps=deps)
+    deps = ManagerDependencies(
+      office_id=office.id, 
+      manager_id=contact.id, 
+      manager_phone_number=contact_phone_number)
+    response = manager_agent.run_sync(
+      content, 
+      message_history=messages, 
+      deps=deps)
   elif contact.kind == 'owner':
-    deps = OwnerDependencies(office_id=office.id, owner_phone_number=contact_phone_number)
-    response = owner_agent.run_sync(content, message_history=messages, deps=deps)
+    deps = OwnerDependencies(
+      office_id=office.id, 
+      owner_id=contact.id, 
+      owner_phone_number=contact_phone_number)
+    response = owner_agent.run_sync(
+      content, 
+      message_history=messages, 
+      deps=deps)
   
   ai_message = add_message_to_conversation(
     office.id, contact_phone_number, response.new_messages_json())
 
-  #print(f"Response: {response.data}")
+  print(f"Response: {response.data}")
     
-  send_reply(office_phone_number,
-             contact_phone_number, 
-             response.data, 
-             num_media > 0, 
-             ai_message.id, 
-             twilio_client, 
-             openai_client)
+  # send_reply(office_phone_number,
+  #            contact_phone_number, 
+  #            response.data, 
+  #            num_media > 0, 
+  #            ai_message.id, 
+  #            twilio_client, 
+  #            openai_client)
 
 
 def main():

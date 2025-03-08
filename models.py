@@ -1,8 +1,14 @@
+from pydantic import BaseModel
 from sqlmodel import Field, SQLModel, select
 from sqlalchemy import union_all, literal_column
 from sqlalchemy.orm import registry
 from sqlalchemy_utils import create_materialized_view
 
+class DoctorAppointment(BaseModel):
+    date: str
+    time: str
+    patient_id: str
+    patient_name: str
 class Office(SQLModel, table=True):
     id: str | None = Field(primary_key=True)
     name: str
