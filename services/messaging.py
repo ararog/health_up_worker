@@ -1,23 +1,20 @@
+import os
 import openai
 import logging
-from decouple import config
 from twilio.rest import Client
-
-twilio_number = config('TWILIO_NUMBER')
-whatsapp_number = config("TO_NUMBER")
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
-def send_text(to_number, message, twilio_client: Client):
+def send_text(from_number, to_number, message, twilio_client: Client):
   response = twilio_client.messages.create(
-      from_=f"whatsapp:{twilio_number}",
+      from_=f"whatsapp:{from_number}",
       body=message,
-      to=to_number
+      to=f"whatsapp:{to_number}",
   )
   return response
 
-def send_audio(to_number, message, ai_response_id, twilio_client: Client, openai_client: openai.OpenAI):
+def send_audio(from_number, to_number, message, ai_response_id, twilio_client: Client, openai_client: openai.OpenAI):
   speech_file_path = f"{ai_response_id}.mp3"
   
   response = openai_client.audio.speech.create(
@@ -29,15 +26,15 @@ def send_audio(to_number, message, ai_response_id, twilio_client: Client, openai
   response.write_to_file(speech_file_path)
   
   response = twilio_client.messages.create(
-      from_=f"whatsapp:{twilio_number}",
+      from_=f"whatsapp:{from_number}",
       media_url=[f"https://healthup.loclx.io/medias/{speech_file_path}"],
       body=message,
-      to=to_number
+      to=f"whatsapp:{to_number}",
   )
   
   return response
 
-def send_reply(to_number, body_text, is_media, ai_response_id, 
+def send_reply(from_number, to_number, body_text, is_media, ai_response_id, 
               twilio_client: Client, openai_client: openai.OpenAI):
   try:
       max_length = 1600
@@ -55,11 +52,11 @@ def send_reply(to_number, body_text, is_media, ai_response_id,
           # Send the chunk as a message
           response = None
           if is_media:
-            response = send_audio(to_number, message_chunk, ai_response_id, twilio_client, openai_client)
+            response = send_audio(from_number, to_number, message_chunk, ai_response_id, twilio_client, openai_client)
           else:
-            response = send_text(to_number, message_chunk, twilio_client)
+            response = send_text(from_number, to_number, message_chunk, twilio_client)
 
-          logger.info(f"Message {i + 1}/{num_messages} sent from {twilio_number} to {to_number}: {response.sid}")
+          logger.info(f"Message {i + 1}/{num_messages} sent from {from_number} to {to_number}: {response.sid}")
 
   except Exception as e:
       logger.error(f"Error sending message to {to_number}: {e}")
