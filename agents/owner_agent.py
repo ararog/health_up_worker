@@ -22,11 +22,15 @@ class OwnerDependencies:
 system_date_time = datetime.datetime.now().strftime("%Y-%m-%dT%H:%M:%S%z")
 
 owner_agent = Agent('openai:gpt-4o', system_prompt="""
-                Current date and time is: %s
                 You are a secretary in a dental office. Perform the following steps:
                 1. Use the `get_office_info` tool to retrieve office info from database.
-              """ % system_date_time)
+              """)
 
+@owner_agent.system_prompt
+def add_date_time() -> str:
+    logger.info("Add date and time...")
+    return f"Current date and time is: {datetime.datetime.now().strftime("%Y-%m-%dT%H:%M:%S%z")}"
+  
 #@owner_agent.tool
 #def get_office_info(ctx: RunContext[OwnerDependencies]) -> Office:
 #    logger.info("Get office info...")

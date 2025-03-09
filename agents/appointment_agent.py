@@ -42,10 +42,7 @@ class AppointmentDependencies:
     patient_id: str
     patient_phone_number: str
 
-system_date_time = datetime.datetime.now().strftime("%Y-%m-%dT%H:%M:%S%z")
-
 appointment_agent = Agent('openai:gpt-4o', system_prompt="""
-                Current date and time is: %s
                 You are a secretary in a dental office. Perform the following steps:
                 1. Use the `get_office_info` tool to retrieve office info from database.
                 2. Use the `list_specialties` tool to retrieve specialties from database.
@@ -67,7 +64,12 @@ appointment_agent = Agent('openai:gpt-4o', system_prompt="""
                 18. If the patient confirms, extract appointment.
                 19. Use the `create_appointment` tool to schedule the appointment.
                 20. End the appointment by saying: See you soon!
-              """ % system_date_time)
+              """)
+
+@appointment_agent.system_prompt
+def add_date_time() -> str:
+    logger.info("Add date and time...")
+    return f"Current date and time is: {datetime.datetime.now().strftime("%Y-%m-%dT%H:%M:%S%z")}"
 
 @appointment_agent.tool
 def get_office_info(ctx: RunContext[AppointmentDependencies]) -> Office:
