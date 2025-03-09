@@ -171,7 +171,6 @@ def main():
         bootstrap_servers=kafka_broker, 
         api_version=(3, 9, 0),
         client_id=kafka_client_id if kafka_client_id else "health_up",
-        group_id=kafka_group_id if kafka_group_id else "health_up",
         security_protocol=kafka_security_protocol if kafka_security_protocol else "PLAINTEXT",
         sasl_mechanism=kafka_sasl_mechanism,
         sasl_plain_username=kafka_sasl_username,
