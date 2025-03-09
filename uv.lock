@@ -482,7 +482,7 @@ dependencies = [
 
 [package.metadata]
 requires-dist = [
-    { name = "kafka-python", specifier = ">=2.0.5" },
+    { name = "kafka-python", specifier = ">=2.0.6" },
     { name = "minio", specifier = ">=7.2.15" },
     { name = "openai", specifier = ">=1.65.1" },
     { name = "psycopg2", specifier = ">=2.9.10" },
@@ -605,11 +605,11 @@ wheels = [
 
 [[package]]
 name = "kafka-python"
-version = "2.0.5"
+version = "2.0.6"
 source = { registry = "https://pypi.org/simple" }
-sdist = { url = "https://files.pythonhosted.org/packages/75/f4/d2c7e99f0928c2a7fab8e3d37335dd7d8b0ad3c2d8da73b04472b8bd4a00/kafka_python-2.0.5.tar.gz", hash = "sha256:49ca4e9318992c716b2eef5b893a80c52c37bfb107a90dd074afca859dcfdd14", size = 281558 }
+sdist = { url = "https://files.pythonhosted.org/packages/4f/ea/a084e240b0c2d3cc79b22c3ad8e7ed23293d362f22aaebd24e25bb38f21d/kafka_python-2.0.6.tar.gz", hash = "sha256:3ac47e7c41a67a1c23f1856c1953594440bb3d9cd532ad70e353982724e5d52d", size = 282472 }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/b1/e2/0b2c006d7ff54fde8bece3a157b7c37fef42aa636c550e3c8769f0f9587d/kafka_python-2.0.5-py2.py3-none-any.whl", hash = "sha256:f2efd895579c105f327097989ca357df539cebc2c5961a85d94b1bb561d34a2c", size = 251260 },
+    { url = "https://files.pythonhosted.org/packages/64/28/348b014ccbc13acb2000f136b8d525de94ba1a5e6c4b558a9a535baf010a/kafka_python-2.0.6-py2.py3-none-any.whl", hash = "sha256:a2fdb00eaea7a827f5f74693365af6b615ff0795860261d8ebaad2bb5bc73e81", size = 252105 },
 ]
 
 [[package]]
