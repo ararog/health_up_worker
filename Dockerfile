@@ -27,7 +27,7 @@ RUN echo "nothing to do"
 FROM base AS runtime
 
 RUN apt-get update &&  \
-  apt-get install -y libpq-dev gcc \
+  apt-get install -y libpq-dev gcc && \
   rm -rf /var/lib/apt/lists/*
 
 COPY --from=builder --chown=app:app /app /app
