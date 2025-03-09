@@ -3,6 +3,9 @@ FROM python:3.12-slim AS base
 
 FROM base as builder
 
+RUN apt-get update &&  \
+  apt-get install -y libpq-dev gcc
+
 COPY --from=ghcr.io/astral-sh/uv:latest /uv /uvx /bin/
 WORKDIR /app
 
@@ -23,9 +26,12 @@ RUN echo "nothing to do"
 
 FROM base AS runtime
 
+RUN apt-get update &&  \
+  apt-get install -y libpq-dev gcc \
+  rm -rf /var/lib/apt/lists/*
+
 COPY --from=builder --chown=app:app /app /app
 
 WORKDIR /app
 
-# Run the application
 CMD ["uv", "run", "main.py"]
