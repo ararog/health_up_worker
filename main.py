@@ -160,10 +160,19 @@ def handle_message(message):
 
 def main():
     kafka_broker = os.getenv('KAFKA_BROKER')
+    kafka_group_id = os.getenv('KAFKA_GROUP_ID')
+    kafka_security_protocol = os.getenv('KAFKA_SECURITY_PROTOCOL')
+    kafka_sasl_username = os.getenv('KAFKA_USER')
+    kafka_sasl_password = os.getenv('KAFKA_PASSWORD')
+    kafka_sasl_mechanism = os.getenv('KAFKA_SASL_MECHANISM')
     consumer = KafkaConsumer(
         'process_message', 
         bootstrap_servers=kafka_broker, 
-        group_id='health_up',
+        group_id=kafka_group_id,
+        security_protocol=kafka_security_protocol if kafka_security_protocol else "PLAINTEXT",
+        sasl_mechanism=kafka_sasl_mechanism,
+        sasl_plain_username=kafka_sasl_username,
+        sasl_plain_password=kafka_sasl_password,
         value_deserializer=lambda m: json.loads(m.decode('ascii')))
     for msg in consumer:
         handle_message(msg.value)
