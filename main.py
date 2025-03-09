@@ -176,6 +176,8 @@ def main():
         sasl_mechanism=kafka_sasl_mechanism,
         sasl_plain_username=kafka_sasl_username,
         sasl_plain_password=kafka_sasl_password,
+        auto_offset_reset = 'earliest',
+        enable_auto_commit = False,
         value_deserializer=lambda m: json.loads(m.decode('ascii')))
     for msg in consumer:
         handle_message(msg.value)
