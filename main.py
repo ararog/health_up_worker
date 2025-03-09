@@ -181,4 +181,5 @@ def main():
         handle_message(msg.value)
 
 if __name__ == "__main__":
+  logger.info("Starting Health Up Worker")
   main()
