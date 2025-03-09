@@ -54,16 +54,15 @@ appointment_agent = Agent('openai:gpt-4o', system_prompt="""
                 7. If there is no existing appointment, say: Hello, welcome to the office. How may I help you today?
                 8. If the patient says they want to make an appointment and you don't know their name, ask for their name.
                 9. If the patient gives their name, use the `create_patient` tool to create a new patient.
-                11. Extract patient id.
-                12. Show numbered list of doctors by name.
-                13. Ask the patient to select a doctor by number.
-                14. If patient choose a doctor, extract doctor id.
-                15. Use the `list_appointments` tool to get a list of office existing appointments.
-                16. Based on a list of existing appointments, suggest a numbered list of 10 available dates and hours for the next two weeks to the patient.
-                17. Ask the patient to select a date and time by number.
-                18. If the patient confirms, extract appointment.
-                19. Use the `create_appointment` tool to schedule the appointment.
-                20. End the appointment by saying: See you soon!
+                10. Show numbered list of doctors by name.
+                11. Ask the patient to select a doctor by number.
+                12. If patient choose a doctor, extract doctor id.
+                13. Use the `list_appointments` tool to get a list of office existing appointments.
+                14. Based on a list of existing appointments, suggest a numbered list of 10 available dates and hours for the next two weeks to the patient.
+                15. Ask the patient to select a date and time by number.
+                16. If the patient confirms, extract appointment.
+                17. Use the `create_appointment` tool to schedule the appointment.
+                18. End the appointment by saying: See you soon!
               """)
 
 @appointment_agent.system_prompt
@@ -102,10 +101,8 @@ def get_doctor(ctx: RunContext[AppointmentDependencies], doctor_name: str) -> Pa
 @appointment_agent.tool
 def get_patient(ctx: RunContext[AppointmentDependencies]) -> Patient:
     logger.info("Get patient...")
-    return find_patient(
-      ctx.deps.office_id, 
-      ctx.deps.patient_id
-    )
+    patient = find_patient(ctx.deps.office_id, ctx.deps.patient_id)
+    return patient
 
 @appointment_agent.tool
 def get_appointment(ctx: RunContext[AppointmentDependencies]) -> Appointment:
@@ -129,12 +126,15 @@ def cancel_appointment(appointment: Appointment) -> bool:
     logger.info("Canceling appointment: ", appointment)
     return delete_appointment(appointment)
   
-@appointment_agent.tool_plain
-def create_appointment(appointment: Appointment, 
-                       doctor_id, patient_id) -> Appointment:
+@appointment_agent.tool
+def create_appointment(ctx: RunContext[AppointmentDependencies], 
+                       appointment: Appointment, 
+                       patient: Patient,
+                       doctor_id) -> Appointment:
     logger.info("Creating appointment: ", appointment)
     appointment.id = uuid7str()
+    appointment.office_id = ctx.deps.office_id
     appointment.doctor_id = doctor_id
-    appointment.patient_id = patient_id
+    appointment.patient_id = patient.id
     add_appointment(appointment)
     return appointment

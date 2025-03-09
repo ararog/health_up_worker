@@ -104,8 +104,6 @@ def handle_message(message):
   office = find_office_by_phone_number(office_phone_number)
   contact = find_contact_by_phone_number(office.id, contact_phone_number)
   
-  print(f"Received contact: {contact}")
-  
   response = None
   messages = get_conversation_messages(office.id, contact_phone_number)
   if contact is None or contact.kind == 'patient':        
@@ -147,15 +145,15 @@ def handle_message(message):
   ai_message = add_message_to_conversation(
     office.id, contact_phone_number, response.new_messages_json())
 
-  #print(f"Response: {response.data}")
+  print(f"Response: {response.data}")
     
-  send_reply(office_phone_number,
-             contact_phone_number, 
-             response.data, 
-             num_media > 0, 
-             ai_message.id, 
-             twilio_client, 
-             openai_client)
+  # send_reply(office_phone_number,
+  #            contact_phone_number, 
+  #            response.data, 
+  #            num_media > 0, 
+  #            ai_message.id, 
+  #            twilio_client, 
+  #            openai_client)
 
 
 def main():
@@ -169,7 +167,8 @@ def main():
     consumer = KafkaConsumer(
         'process_message', 
         bootstrap_servers=kafka_broker, 
-        api_version=(3, 9, 0),
+        #api_version=(3, 9, 0),
+        api_version=(1, 1, 1),
         client_id=kafka_client_id if kafka_client_id else "health_up",
         group_id=kafka_group_id if kafka_group_id else "health_up",
         security_protocol=kafka_security_protocol if kafka_security_protocol else "PLAINTEXT",

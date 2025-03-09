@@ -29,10 +29,10 @@ class Speciality(SQLModel, table=True):
     
 class BaseContact(SQLModel):
     name: str
-    bio: str
-    phone_number: str
-    email: str
-    address: str
+    bio: str | None = None
+    phone_number: str | None = None
+    email: str | None = None
+    address: str | None = None
 
 class Owner(BaseContact, table=True):
     id: str | None = Field(primary_key=True)
