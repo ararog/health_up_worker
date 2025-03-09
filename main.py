@@ -147,15 +147,15 @@ def handle_message(message):
   ai_message = add_message_to_conversation(
     office.id, contact_phone_number, response.new_messages_json())
 
-  print(f"Response: {response.data}")
+  #print(f"Response: {response.data}")
     
-  # send_reply(office_phone_number,
-  #            contact_phone_number, 
-  #            response.data, 
-  #            num_media > 0, 
-  #            ai_message.id, 
-  #            twilio_client, 
-  #            openai_client)
+  send_reply(office_phone_number,
+             contact_phone_number, 
+             response.data, 
+             num_media > 0, 
+             ai_message.id, 
+             twilio_client, 
+             openai_client)
 
 
 def main():
