@@ -54,7 +54,7 @@ from pydantic_ai.messages import (
 load_dotenv()
 
 logger = logging.getLogger('kafka')
-logger.setLevel(logging.CRITICAL)
+logger.setLevel(logging.INFO)
 
 account_sid = os.getenv("TWILIO_ACCOUNT_SID")
 auth_token = os.getenv("TWILIO_AUTH_TOKEN")
