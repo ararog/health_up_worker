@@ -8,6 +8,7 @@ String dockerRegistry = "registry.local:5000"
 String infraJob = "Training/training%2F${appName}-kube"
 String infraBranch = "main"
 dockerPipeline([
+  createEnv: true,
   dockerRepository: dockerRepository,
   dockerRegistry: dockerRegistry,
   platform: "linux/amd64",
