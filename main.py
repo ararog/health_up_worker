@@ -160,6 +160,7 @@ def handle_message(message):
 
 def main():
     kafka_broker = os.getenv('KAFKA_BROKER')
+    kafka_client_id = os.getenv('KAFKA_CLIENT_ID')
     kafka_group_id = os.getenv('KAFKA_GROUP_ID')
     kafka_security_protocol = os.getenv('KAFKA_SECURITY_PROTOCOL')
     kafka_sasl_username = os.getenv('KAFKA_USER')
@@ -168,7 +169,9 @@ def main():
     consumer = KafkaConsumer(
         'process_message', 
         bootstrap_servers=kafka_broker, 
+        api_version=(3, 9, 0),
         group_id=kafka_group_id,
+        client_id=kafka_client_id,
         security_protocol=kafka_security_protocol if kafka_security_protocol else "PLAINTEXT",
         sasl_mechanism=kafka_sasl_mechanism,
         sasl_plain_username=kafka_sasl_username,
