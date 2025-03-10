@@ -14,7 +14,9 @@ def transcribe_media(media_url, media_path, mime_type,
     auth=(twilio_client.account_sid, twilio_client.password), 
     stream=True
   ).raw.read()
-  filename = '{path}/{sid}{ext}'.format(path=media_path, sid=media_sid, ext=file_extension)
+  filename = '{path}/{sid}{ext}'.format(path=media_path, 
+                                        sid=media_sid, 
+                                        ext=file_extension if file_extension else '.oga')
   with open(filename, 'wb') as fd:
     fd.write(content)
   

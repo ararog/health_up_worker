@@ -88,7 +88,8 @@ def handle_message(message):
   if num_media > 0:
       media_url = message["media_url"]
       mime_type = message["media_type"]
-      content = transcribe_media(media_url, media_path, mime_type, twilio_client, openai_client)
+      content = transcribe_media(media_url, media_path, mime_type, 
+                                 twilio_client, openai_client)
   
   if content is None:
       content = message["body"]
