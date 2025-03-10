@@ -58,6 +58,7 @@ logger.setLevel(logging.INFO)
 
 account_sid = os.getenv("TWILIO_ACCOUNT_SID")
 auth_token = os.getenv("TWILIO_AUTH_TOKEN")
+media_path = os.getenv("MEDIAS_PATH")
 
 twilio_client = Client(account_sid, auth_token)
 openai_client = openai.OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
@@ -84,7 +85,6 @@ def to_chat_message(m: ModelMessage) -> ChatMessage:
 def handle_message(message):
   content = message["body"]
   num_media = int(message["num_media"] or 0)
-  media_path = os.getenv("MEDIA_PATH")
   if num_media > 0:
       media_url = message["media_url"]
       mime_type = message["media_type"]
@@ -151,7 +151,8 @@ def handle_message(message):
              contact_phone_number, 
              response.data, 
              num_media > 0, 
-             ai_message.id, 
+             ai_message.id,
+             media_path,
              twilio_client, 
              openai_client)
 
@@ -167,8 +168,8 @@ def main():
     consumer = KafkaConsumer(
         'process_message', 
         bootstrap_servers=kafka_broker, 
-        api_version=(3, 9, 0),
-        #api_version=(1, 1, 1),
+        #api_version=(3, 9, 0),
+        api_version=(1, 1, 1),
         client_id=kafka_client_id if kafka_client_id else "health_up",
         group_id=kafka_group_id if kafka_group_id else "health_up",
         security_protocol=kafka_security_protocol if kafka_security_protocol else "PLAINTEXT",
