@@ -90,6 +90,9 @@ def handle_message(message):
       mime_type = message["media_type"]
       content = transcribe_media(media_url, media_path, mime_type, twilio_client, openai_client)
   
+  if content is None:
+      content = message["body"]
+  
   office_phone_number = message["to_number"]
   if ':' in office_phone_number:
       office_phone_number = office_phone_number.split(':')[1]

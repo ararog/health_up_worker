@@ -18,9 +18,12 @@ def transcribe_media(media_url, media_path, mime_type,
   with open(filename, 'wb') as fd:
     fd.write(content)
   
-  response = openai_client.audio.transcriptions.create(
-      model="whisper-1",
-      file=open(filename, "rb"),
-      response_format="text"
-  )
-  return response
+  if os.path.exists(filename):  
+    response = openai_client.audio.transcriptions.create(
+        model="whisper-1",
+        file=open(filename, "rb"),
+        response_format="text"
+    )
+    return response
+
+  return None
