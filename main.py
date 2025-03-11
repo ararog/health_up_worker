@@ -83,8 +83,14 @@ def to_chat_message(m: ModelMessage) -> ChatMessage:
     raise UnexpectedModelBehavior(f'Unexpected message type for chat app: {m}')
 
 def handle_message(message):
+  if 'to_number' not in message:
+      return 
+  if 'from_number' not in message:
+      return
+    
   content = message["body"]
   num_media = int(message["num_media"] or 0)
+    
   if num_media > 0:
       media_url = message["media_url"]
       mime_type = message["media_type"]

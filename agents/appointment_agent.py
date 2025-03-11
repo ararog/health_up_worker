@@ -3,6 +3,8 @@ import logging
 from dataclasses import dataclass
 from uuid_extensions import uuid7str
 from pydantic_ai import Agent, RunContext
+from pydantic_ai.models.openai import OpenAIModel
+from pydantic_ai.providers.openai import OpenAIProvider
 from models import (
     Office,
     Appointment,
@@ -41,6 +43,10 @@ class AppointmentDependencies:
     office_id: str
     patient_id: str
     patient_phone_number: str
+    
+# ollama_model = OpenAIModel(
+#     model_name='llama3.2', provider=OpenAIProvider(base_url='http://localhost:11434/v1')
+# )    
 
 appointment_agent = Agent('openai:gpt-4o', system_prompt="""
                 You are a secretary in a dental office. Perform the following steps:
@@ -51,7 +57,7 @@ appointment_agent = Agent('openai:gpt-4o', system_prompt="""
                 5. Use the `list_specialties` tool to retrieve specialties from database.
                 6. Use the `list_doctors` tool to retrieve doctors from database.
                 7. Use the `cancel_appointment` tool to cancel an appointment.
-                8. When greeting the patient, check patient name.
+                8. When greeting the patient, greet patient with his name.
                 9. If there is an existing appointment, say: Hello, welcome back. You have an scheduled existing appointment. What do you want? Show a list of available menu options:
                     1. Cancel appointment
                     2. Reschedule appointment                

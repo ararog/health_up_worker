@@ -9,6 +9,18 @@ class DoctorAppointment(BaseModel):
     time: str
     patient_id: str
     patient_name: str
+
+class OfficeRevenue(BaseModel):
+    date: str
+    revenue: float
+    
+class OfficePopularServices(BaseModel):
+    name: str
+    count: int
+class OfficeInventory(BaseModel):
+    name: str
+    description: str
+    quantity: int
 class Office(SQLModel, table=True):
     id: str | None = Field(primary_key=True)
     name: str

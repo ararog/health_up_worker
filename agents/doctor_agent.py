@@ -17,13 +17,8 @@ from services.patient import (
 )
 
 from services.appointment import (
-    find_appointment,
     delete_appointment,
     list_doctor_appointments,
-)
-
-from services.patient import (
-    find_patient,
 )
 
 logger = logging.getLogger('health_up:doctor_agent')
@@ -35,19 +30,24 @@ class DoctorDependencies:
     doctor_id: str
     doctor_phone_number: str
 
+# ollama_model = OpenAIModel(
+#     model_name='llama3.2', provider=OpenAIProvider(base_url='http://localhost:11434/v1')
+# )   
+
 doctor_agent = Agent('openai:gpt-4o', system_prompt="""
                 Date format is: DD/MM/YYYY
                 You are a doctor secretary in a dental office. Perform the following steps:
-                1. Use the `get_doctor` tool to retrieve doctor info from database.
-                2. When greeting doctor, please greet doctor by his name. How can I help you? Show a list of available commands:
+                1. Remember doctor can use word 'menu' to see the menu.
+                2. Use the `get_doctor` tool to retrieve doctor info from database.
+                3. When greeting doctor, please greet doctor by his name. How can I help you? Show a list of available commands:
                     1. List appointments
-                3. Use the `list_appointments` tool to get a list of doctor existing appointments.
-                4. If doctor says he wants to see his appointments, show numbered list of doctor appointments in the following format: <time> - <patient_name>
-                5. Ask the doctor to select a appointment by number.
-                6. If doctor choose an appointment, extract patient id.
-                7. Ask doctor if he wants to see patient history.
-                8. If yes, use the `get_patient_history` tool to retrieve patient history from database.
-                9. Show list of patient history in the following format:
+                4. Use the `list_appointments` tool to get a list of doctor existing appointments.
+                5. If doctor says he wants to see his appointments, show numbered list of doctor appointments in the following format: <time> - <patient_name>
+                6. Ask the doctor to select a appointment by number.
+                7. If doctor choose an appointment, extract patient id.
+                8. Ask doctor if he wants to see patient history.
+                9. If yes, use the `get_patient_history` tool to retrieve patient history from database.
+                10. Show list of patient history in the following format:
                     - Patient: <patient_name>
                     - Date: <date_time>
                     - Description: <description>
