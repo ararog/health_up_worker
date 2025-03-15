@@ -48,13 +48,14 @@ def list_doctor_appointments(doctor_id, actual_date, actual_time) -> list[Doctor
 
         return appointments
     
-def find_appointment(office_id, patient_id) -> Patient: 
+def find_appointment(office_id, patient_id, actual_date, actual_time) -> Patient: 
     with Session(engine) as session:
         actual_date_time = datetime.datetime.now().strftime("%Y-%m-%dT%H:%M:%S%z")
         statement = select(Appointment, Patient, Office)
         statement = statement.where(Appointment.office_id == office_id)
         statement = statement.where(Appointment.patient_id == Patient.id)
-        statement = statement.where(Appointment.date > actual_date_time)
+        statement = statement.where(Appointment.date >= actual_date)
+        statement = statement.where(Appointment.time >= actual_time)
         statement = statement.where(Patient.id == patient_id)
         results = session.exec(statement)
         

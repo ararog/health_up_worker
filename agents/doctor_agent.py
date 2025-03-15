@@ -9,6 +9,7 @@ from models import (
     Patient,
 )
 
+from utils import actual_date_time
 from services.doctor import (
   find_doctor_by_id,
 )
@@ -63,11 +64,8 @@ def current_date_time() -> str:
 @doctor_agent.tool
 def list_appointments(ctx: RunContext[DoctorDependencies]) -> list[DoctorAppointment]:
     logger.info("Listing appointments...")
-    tz = pytz.timezone('America/Sao_Paulo')
-    now = datetime.datetime.now(tz)
-    actual_date = now.strftime("%Y-%m-%d")
-    actual_time = now.strftime("%H:%M:%S")
-    return list_doctor_appointments(ctx.deps.doctor_id, actual_date, actual_time)
+    now = actual_date_time()
+    return list_doctor_appointments(ctx.deps.doctor_id, now.date, now.time)
 
 @doctor_agent.tool
 def get_doctor(ctx: RunContext[DoctorDependencies]) -> Patient:

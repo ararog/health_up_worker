@@ -14,6 +14,7 @@ from models import (
     Speciality,
 )
 
+from utils import actual_date_time
 from services.speciality import find_specilities_by_office_id
 from services.doctor import (
   find_doctor_by_name,
@@ -104,11 +105,8 @@ def list_specialities(ctx: RunContext[AppointmentDependencies]) -> list[Speciali
 @appointment_agent.tool
 def list_appointments(ctx: RunContext[AppointmentDependencies]) -> list[Appointment]:
     logger.info("Listing appointments...")
-    tz = pytz.timezone('America/Sao_Paulo')
-    now = datetime.datetime.now(tz)
-    actual_date = now.strftime("%Y-%m-%d")
-    actual_time = now.strftime("%H:%M:%S")
-    return list_office_appointments(ctx.deps.office_id, actual_date, actual_time)
+    now = actual_date_time()
+    return list_office_appointments(ctx.deps.office_id, now.date, now.time)
 
 @appointment_agent.tool
 def get_doctor(ctx: RunContext[AppointmentDependencies], doctor_name: str) -> Patient:
@@ -127,9 +125,12 @@ def get_patient(ctx: RunContext[AppointmentDependencies]) -> Patient:
 @appointment_agent.tool
 def get_appointment(ctx: RunContext[AppointmentDependencies]) -> Appointment:
     logger.info("Get appointment...")
+    now = actual_date_time()
     return find_appointment(
       ctx.deps.office_id, 
-      ctx.deps.patient_id
+      ctx.deps.patient_id,
+      now.date,
+      now.time
     )
   
 @appointment_agent.tool
