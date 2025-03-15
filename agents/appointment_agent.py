@@ -105,8 +105,10 @@ def list_specialities(ctx: RunContext[AppointmentDependencies]) -> list[Speciali
 def list_appointments(ctx: RunContext[AppointmentDependencies]) -> list[Appointment]:
     logger.info("Listing appointments...")
     tz = pytz.timezone('America/Sao_Paulo')
-    actual_date_time = datetime.datetime.now(tz).strftime("%Y-%m-%dT%H:%M:%S%z")
-    return list_office_appointments(ctx.deps.office_id, actual_date_time)
+    now = datetime.datetime.now(tz)
+    actual_date = now.strftime("%Y-%m-%d")
+    actual_time = now.strftime("%H:%M:%S")
+    return list_office_appointments(ctx.deps.office_id, actual_date, actual_time)
 
 @appointment_agent.tool
 def get_doctor(ctx: RunContext[AppointmentDependencies], doctor_name: str) -> Patient:

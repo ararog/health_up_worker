@@ -12,10 +12,11 @@ from models import (
     Patient
 )
     
-def list_office_appointments(office_id, actual_date_time) -> list[Appointment]:
+def list_office_appointments(office_id, actual_date, actual_time) -> list[Appointment]:
     with Session(engine) as session:
         statement = select(Appointment)
-        statement = statement.where(Appointment.date >= actual_date_time)
+        statement = statement.where(Appointment.date >= actual_date)
+        statement = statement.where(Appointment.time >= actual_time)
         statement = statement.where(Appointment.office_id == office_id)
         statement = statement.limit(10)
         results = session.exec(statement)
@@ -26,10 +27,11 @@ def list_office_appointments(office_id, actual_date_time) -> list[Appointment]:
 
         return appointments
 
-def list_doctor_appointments(doctor_id, actual_date_time) -> list[DoctorAppointment]:
+def list_doctor_appointments(doctor_id, actual_date, actual_time) -> list[DoctorAppointment]:
     with Session(engine) as session:
         statement = select(Appointment, Patient).join(Patient)
-        statement = statement.where(Appointment.date >= actual_date_time)
+        statement = statement.where(Appointment.date >= actual_date)
+        statement = statement.where(Appointment.time >= actual_time)
         statement = statement.where(Appointment.doctor_id == doctor_id)
         results = session.exec(statement)
         

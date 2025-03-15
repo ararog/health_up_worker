@@ -64,8 +64,10 @@ def current_date_time() -> str:
 def list_appointments(ctx: RunContext[DoctorDependencies]) -> list[DoctorAppointment]:
     logger.info("Listing appointments...")
     tz = pytz.timezone('America/Sao_Paulo')
-    actual_date_time = datetime.datetime.now(tz).strftime("%Y-%m-%dT%H:%M:%S%z")
-    return list_doctor_appointments(ctx.deps.doctor_id, actual_date_time)
+    now = datetime.datetime.now(tz)
+    actual_date = now.strftime("%Y-%m-%d")
+    actual_time = now.strftime("%H:%M:%S")
+    return list_doctor_appointments(ctx.deps.doctor_id, actual_date, actual_time)
 
 @doctor_agent.tool
 def get_doctor(ctx: RunContext[DoctorDependencies]) -> Patient:
