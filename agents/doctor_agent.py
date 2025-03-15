@@ -58,12 +58,14 @@ doctor_agent = Agent('openai:gpt-4o', system_prompt="""
 def current_date_time() -> str:
     logger.info("Add date and time...")
     tz = pytz.timezone('America/Sao_Paulo')
-    return f"Current date and time is: {datetime.datetime.now(tz).strftime("%Y-%m-%dT%H:%M:%S %Z")}"
+    return f"Current date and time is: {datetime.datetime.now(tz).strftime("%Y-%m-%dT%H:%M:%S%z")}"
   
 @doctor_agent.tool
 def list_appointments(ctx: RunContext[DoctorDependencies]) -> list[DoctorAppointment]:
     logger.info("Listing appointments...")
-    return list_doctor_appointments(ctx.deps.doctor_id)
+    tz = pytz.timezone('America/Sao_Paulo')
+    actual_date_time = datetime.datetime.now(tz).strftime("%Y-%m-%dT%H:%M:%S%z")
+    return list_doctor_appointments(ctx.deps.doctor_id, actual_date_time)
 
 @doctor_agent.tool
 def get_doctor(ctx: RunContext[DoctorDependencies]) -> Patient:

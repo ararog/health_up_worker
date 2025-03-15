@@ -1,4 +1,5 @@
 import datetime
+import pytz
 from database import engine
 from sqlmodel import (
     select,
@@ -11,9 +12,8 @@ from models import (
     Patient
 )
     
-def list_office_appointments(office_id) -> list[Appointment]:
+def list_office_appointments(office_id, actual_date_time) -> list[Appointment]:
     with Session(engine) as session:
-        actual_date_time = datetime.datetime.now().strftime("%Y-%m-%dT%H:%M:%S%z")
         statement = select(Appointment)
         statement = statement.where(Appointment.date >= actual_date_time)
         statement = statement.where(Appointment.office_id == office_id)
@@ -26,9 +26,8 @@ def list_office_appointments(office_id) -> list[Appointment]:
 
         return appointments
 
-def list_doctor_appointments(doctor_id) -> list[DoctorAppointment]:
+def list_doctor_appointments(doctor_id, actual_date_time) -> list[DoctorAppointment]:
     with Session(engine) as session:
-        actual_date_time = datetime.datetime.now().strftime("%Y-%m-%dT%H:%M:%S%z")
         statement = select(Appointment, Patient).join(Patient)
         statement = statement.where(Appointment.date >= actual_date_time)
         statement = statement.where(Appointment.doctor_id == doctor_id)
