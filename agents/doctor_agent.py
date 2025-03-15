@@ -1,4 +1,5 @@
 import datetime
+import pytz
 import logging
 from dataclasses import dataclass
 from pydantic_ai import Agent, RunContext
@@ -56,7 +57,8 @@ doctor_agent = Agent('openai:gpt-4o', system_prompt="""
 @doctor_agent.tool_plain
 def current_date_time() -> str:
     logger.info("Add date and time...")
-    return f"Current date and time is: {datetime.datetime.now().strftime("%Y-%m-%dT%H:%M:%S%z")}"
+    tz = pytz.timezone('America/Sao_Paulo')
+    return f"Current date and time is: {datetime.datetime.now(tz).strftime("%Y-%m-%dT%H:%M:%S %Z")}"
   
 @doctor_agent.tool
 def list_appointments(ctx: RunContext[DoctorDependencies]) -> list[DoctorAppointment]:

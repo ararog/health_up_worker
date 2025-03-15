@@ -17,4 +17,5 @@ dependencies = [
   "twilio>=9.4.6",
   "uuid7>=0.1.0",
   "ollama>=0.4.7",
+  "pytz>=2025.1",
 ]
