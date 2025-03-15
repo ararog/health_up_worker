@@ -64,8 +64,8 @@ def current_date_time() -> str:
 @doctor_agent.tool
 def list_appointments(ctx: RunContext[DoctorDependencies]) -> list[DoctorAppointment]:
     logger.info("Listing appointments...")
-    now = actual_date_time()
-    return list_doctor_appointments(ctx.deps.doctor_id, now.date, now.time)
+    now = actual_date_time('America/Sao_Paulo')
+    return list_doctor_appointments(ctx.deps.doctor_id, now.date_time)
 
 @doctor_agent.tool
 def get_doctor(ctx: RunContext[DoctorDependencies]) -> Patient:

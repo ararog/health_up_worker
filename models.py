@@ -1,5 +1,6 @@
+from datetime import datetime
 from pydantic import BaseModel
-from sqlmodel import Field, SQLModel, select
+from sqlmodel import Field, SQLModel, select, Column, DateTime
 from sqlalchemy import union_all, literal_column
 from sqlalchemy.orm import registry
 from sqlalchemy_utils import create_materialized_view
@@ -64,7 +65,7 @@ class Patient(BaseContact, table=True):
 
 class PatientExam(SQLModel, table=True):
     id: str | None = Field(primary_key=True)
-    date_time: str
+    date_time: datetime = Field(sa_column=Column(DateTime(), nullable=False))
     name: str
     status: str
     description: str
@@ -73,15 +74,14 @@ class PatientExam(SQLModel, table=True):
 
 class PatientHistory(SQLModel, table=True):
     id: str | None = Field(primary_key=True)
-    date_time: str
+    date_time: datetime = Field(sa_column=Column(DateTime(), nullable=False))
     description: str
     patient_id: str | None = Field(default=None, foreign_key="patient.id")
     doctor_id: str | None = Field(default=None, foreign_key="doctor.id")
 
 class Appointment(SQLModel, table=True):
     id: str | None = Field(primary_key=True)
-    date: str
-    time: str
+    date_time: datetime = Field(sa_column=Column(DateTime(), nullable=False))
     office_id: str | None = Field(default=None, foreign_key="office.id")
     patient_id: str | None = Field(default=None, foreign_key="patient.id")
     doctor_id:  str | None = Field(default=None, foreign_key="doctor.id")
