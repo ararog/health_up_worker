@@ -38,8 +38,8 @@ manager_agent = Agent('openai:gpt-4o', system_prompt="""
                     1. List inventory
               """)
 
-@manager_agent.system_prompt
-def add_date_time() -> str:
+@manager_agent.tool_plain
+def current_date_time() -> str:
     logger.info("Add date and time...")
     return f"Current date and time is: {datetime.datetime.now().strftime("%Y-%m-%dT%H:%M:%S%z")}"
   

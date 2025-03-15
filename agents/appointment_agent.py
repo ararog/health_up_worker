@@ -79,8 +79,8 @@ appointment_agent = Agent('openai:gpt-4o', system_prompt="""
                 20. End the appointment by saying: See you soon!
               """)
 
-@appointment_agent.system_prompt
-def add_date_time() -> str:
+@appointment_agent.tool_plain
+def current_date_time() -> str:
     logger.info("Add date and time...")
     return f"Current date and time is: {datetime.datetime.now().strftime("%Y-%m-%dT%H:%M:%S%z")}"
 

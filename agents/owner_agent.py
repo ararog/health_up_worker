@@ -41,8 +41,8 @@ owner_agent = Agent('openai:gpt-4o', system_prompt="""
                     2. List most popular services
               """)
 
-@owner_agent.system_prompt
-def add_date_time() -> str:
+@owner_agent.tool_plain
+def current_date_time() -> str:
     logger.info("Add date and time...")
     return f"Current date and time is: {datetime.datetime.now().strftime("%Y-%m-%dT%H:%M:%S%z")}"
   
