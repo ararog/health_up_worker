@@ -1,4 +1,3 @@
-import datetime
 from database import engine
 from sqlmodel import (
     select,
@@ -28,7 +27,7 @@ def list_office_appointments(office_id, actual_date_time) -> list[Appointment]:
 def list_doctor_appointments(doctor_id, actual_date_time) -> list[DoctorAppointment]:
     with Session(engine) as session:
         statement = select(Appointment, Patient).join(Patient)
-        statement = statement.where(Appointment.date >= actual_date_time)
+        statement = statement.where(Appointment.date_time >= actual_date_time)
         statement = statement.where(Appointment.doctor_id == doctor_id)
         results = session.exec(statement)
         
@@ -38,8 +37,7 @@ def list_doctor_appointments(doctor_id, actual_date_time) -> list[DoctorAppointm
               DoctorAppointment(
                 patient_id=patient.id, 
                 patient_name=patient.name, 
-                date=appointment.date, 
-                time=appointment.time
+                date_time=appointment.date_time, 
               )
             )
 

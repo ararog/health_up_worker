@@ -6,10 +6,9 @@ from sqlalchemy.orm import registry
 from sqlalchemy_utils import create_materialized_view
 
 class DoctorAppointment(BaseModel):
-    date: str
-    time: str
     patient_id: str
     patient_name: str
+    date_time: datetime
 
 class OfficeRevenue(BaseModel):
     date: str
