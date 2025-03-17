@@ -36,7 +36,7 @@ class DoctorDependencies:
 #     model_name='llama3.2', provider=OpenAIProvider(base_url='http://localhost:11434/v1')
 # )   
 
-doctor_agent = Agent("openai:gpt-4o-mini", system_prompt="""
+doctor_agent = Agent("openai:gpt-4o", system_prompt="""
                 Date format is: DD/MM/YYYY
                 You are a doctor secretary in a dental office. Perform the following steps:
                 1. Remember doctor can use word 'menu' to see the menu.

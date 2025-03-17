@@ -50,9 +50,11 @@ class AppointmentDependencies:
 #     model_name='phi4-mini', provider=OpenAIProvider(base_url='http://localhost:11434/v1')
 # )    
 
-appointment_agent = Agent("openai:gpt-4o-mini", system_prompt="""
+appointment_agent = Agent("openai:gpt-4o", system_prompt="""
+                Date format is: DD/MM/YYYY
+                Reply patient with patient name
                 You are a secretary in a dental office. Perform the following steps:
-                1. Remember patient can use word 'menu' to see the menu.
+                1. Say patient can use word 'menu' to see the menu.
                 2. Use the `get_office_info` tool to retrieve office info from database.
                 3. Use the `get_patient` tool to retrieve patient from database.
                 4. Use the `get_appointment` tool to retrieve existing appointment from database. 
@@ -76,14 +78,14 @@ appointment_agent = Agent("openai:gpt-4o-mini", system_prompt="""
                 16. Use the `list_appointments` tool to get a list of office existing appointments.
                 17. Based on a list of existing appointments, suggest a numbered list of 10 available dates and hours for the next two weeks to the patient.
                 18. Ask the patient to select a date and time by number.
-                19. If you don't have patient id, get patient and extract his id.
+                19. Use patient id and doctor id to schedule the appointment.
                 20. If the patient confirms, extract appointment.
                 21. Use the `create_appointment` tool to schedule the appointment.
                 22. Ask if user knows office location, give two options:
                     1. Yes
                     2. No
-                23. If the patient says yes, give the address.
-                24. If the patient says no, say: Ok, see you soon!
+                23. If the patient says no, give the office location.
+                24. If the patient says yes, say: Ok, see you soon!
               """)
 
 @appointment_agent.system_prompt
@@ -92,11 +94,30 @@ def start_date_time() -> str:
     now = actual_date_time('America/Sao_Paulo')
     return f"Current date and time is: {now.date_time}"
 
-@appointment_agent.tool_plain
-def current_date_time() -> str:
+@appointment_agent.tool
+def current_date_time(ctx: RunContext[AppointmentDependencies]) -> str:
     logger.info("Add date and time...")
     now = actual_date_time('America/Sao_Paulo')
     return f"Current date and time is: {now.date_time}"
+
+@appointment_agent.tool
+def get_patient_id(ctx: RunContext[AppointmentDependencies]) -> Patient:
+    return ctx.deps.patient_id
+
+@appointment_agent.tool
+def get_patient(ctx: RunContext[AppointmentDependencies]) -> Patient:
+    logger.info("Get patient...")
+    patient = find_patient(ctx.deps.office_id, ctx.deps.patient_phone_number)
+    return patient
+
+@appointment_agent.tool
+def create_patient(ctx: RunContext[AppointmentDependencies], 
+                   patient: Patient) -> Patient:
+    patient.id = uuid7str()
+    patient.phone_number = ctx.deps.patient_phone_number
+    patient.office_id = ctx.deps.office_id
+    add_patient(patient)
+    return patient
 
 @appointment_agent.tool
 def get_office_info(ctx: RunContext[AppointmentDependencies]) -> Office:
@@ -109,6 +130,14 @@ def list_doctors(ctx: RunContext[AppointmentDependencies]) -> list[Doctor]:
     return find_doctors_by_office_id(ctx.deps.office_id)
 
 @appointment_agent.tool
+def get_doctor(ctx: RunContext[AppointmentDependencies], doctor_name: str) -> Patient:
+    logger.info("Get doctor...")
+    return find_doctor_by_name(
+      ctx.deps.office_id, 
+      doctor_name
+    )
+    
+@appointment_agent.tool
 def list_specialities(ctx: RunContext[AppointmentDependencies]) -> list[Speciality]:
     logger.info("Get office specialists...")
     return find_specilities_by_office_id(ctx.deps.office_id)
@@ -118,21 +147,7 @@ def list_appointments(ctx: RunContext[AppointmentDependencies]) -> list[Appointm
     logger.info("Listing appointments...")
     now = actual_date_time('America/Sao_Paulo')
     return list_office_appointments(ctx.deps.office_id, now.date_time)
-
-@appointment_agent.tool
-def get_doctor(ctx: RunContext[AppointmentDependencies], doctor_name: str) -> Patient:
-    logger.info("Get doctor...")
-    return find_doctor_by_name(
-      ctx.deps.office_id, 
-      doctor_name
-    )
-
-@appointment_agent.tool
-def get_patient(ctx: RunContext[AppointmentDependencies]) -> Patient:
-    logger.info("Get patient...")
-    patient = find_patient(ctx.deps.office_id, ctx.deps.patient_phone_number)
-    return patient
-
+  
 @appointment_agent.tool
 def get_appointment(ctx: RunContext[AppointmentDependencies]) -> Appointment:
     logger.info("Get appointment...")
@@ -140,15 +155,6 @@ def get_appointment(ctx: RunContext[AppointmentDependencies]) -> Appointment:
     return find_appointment(ctx.deps.office_id, 
                             ctx.deps.patient_id, 
                             now.date_time)
-  
-@appointment_agent.tool
-def create_patient(ctx: RunContext[AppointmentDependencies], 
-                   patient: Patient) -> Patient:
-    patient.id = uuid7str()
-    patient.phone_number = ctx.deps.patient_phone_number
-    patient.office_id = ctx.deps.office_id
-    add_patient(patient)
-    return patient
 
 @appointment_agent.tool_plain
 def cancel_appointment(appointment: Appointment) -> bool:
@@ -162,6 +168,6 @@ def create_appointment(ctx: RunContext[AppointmentDependencies],
     appointment.id = uuid7str()
     appointment.office_id = ctx.deps.office_id
     appointment.doctor_id = doctor_id
-    appointment.patient_id = patient_id
+    appointment.patient_id = patient_id if patient_id else ctx.deps.patient_id
     add_appointment(appointment)
     return appointment

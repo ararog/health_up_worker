@@ -31,7 +31,7 @@ class OwnerDependencies:
 #     model_name='llama3.2', provider=OpenAIProvider(base_url='http://localhost:11434/v1')
 # )   
 
-owner_agent = Agent("openai:gpt-4o-mini", system_prompt="""
+owner_agent = Agent("openai:gpt-4o", system_prompt="""
                 You are a secretary in a dental office. Perform the following steps:
                 1. Remember owner can use word 'menu' to see the menu.                
                 2. Use the `get_owner` tool to retrieve owner info from database.
