@@ -30,7 +30,7 @@ class ManagerDependencies:
 #     model_name='llama3.2', provider=OpenAIProvider(base_url='http://localhost:11434/v1')
 # )   
 
-manager_agent = Agent('openai:gpt-4o', system_prompt="""
+manager_agent = Agent("openai:gpt-4o-mini", system_prompt="""
                 You are a secretary in a dental office. Perform the following steps:
                 1. Remember manager can use word 'menu' to see the menu.                
                 2. Use the `get_manager` tool to retrieve doctor info from database.

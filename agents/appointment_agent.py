@@ -47,10 +47,10 @@ class AppointmentDependencies:
     patient_phone_number: str
     
 # ollama_model = OpenAIModel(
-#     model_name='llama3.2', provider=OpenAIProvider(base_url='http://localhost:11434/v1')
+#     model_name='phi4-mini', provider=OpenAIProvider(base_url='http://localhost:11434/v1')
 # )    
 
-appointment_agent = Agent('openai:gpt-4o', system_prompt="""
+appointment_agent = Agent("openai:gpt-4o-mini", system_prompt="""
                 You are a secretary in a dental office. Perform the following steps:
                 1. Remember patient can use word 'menu' to see the menu.
                 2. Use the `get_office_info` tool to retrieve office info from database.
