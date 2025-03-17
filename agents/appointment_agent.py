@@ -79,7 +79,11 @@ appointment_agent = Agent("openai:gpt-4o-mini", system_prompt="""
                 19. If you don't have patient id, get patient and extract his id.
                 20. If the patient confirms, extract appointment.
                 21. Use the `create_appointment` tool to schedule the appointment.
-                22. End the appointment by saying: See you soon!
+                22. Ask if user knows office location, give two options:
+                    1. Yes
+                    2. No
+                23. If the patient says yes, give the address.
+                24. If the patient says no, say: Ok, see you soon!
               """)
 
 @appointment_agent.system_prompt
