@@ -51,13 +51,12 @@ def send_reply(from_number, to_number, body_text, is_media, ai_response_id,
           # Get the substring for the current chunk
           message_chunk = body_text[start_index:end_index]
           
-          # Send the chunk as a message
-          response = None
-          if is_media:
-            response = send_audio(from_number, to_number, message_chunk, 
-                                  ai_response_id, media_path, twilio_client, openai_client)
-          else:
-            response = send_text(from_number, to_number, message_chunk, twilio_client)
+          response = send_text(from_number, to_number, message_chunk, twilio_client)
+          # if is_media:
+          #   response = send_audio(from_number, to_number, message_chunk, 
+          #                         ai_response_id, media_path, twilio_client, openai_client)
+          # else:
+          #   response = send_text(from_number, to_number, message_chunk, twilio_client)
 
           logger.info(f"Message {i + 1}/{num_messages} sent from {from_number} to {to_number}: {response.sid}")
 
