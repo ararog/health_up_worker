@@ -12,6 +12,7 @@ def add_patient(patient) -> Patient:
     with Session(engine) as session:
         session.add(patient)
         session.commit()
+        session.flush()
         return patient
 
 def find_patient(office_id, phone_number) -> Patient: 

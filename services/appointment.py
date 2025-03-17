@@ -61,6 +61,7 @@ def add_appointment(appointment) -> Appointment:
     with Session(engine) as session:
         session.add(appointment)
         session.commit()
+        session.flush()
         return appointment
 
 def delete_appointment(appointment: Appointment) -> bool: 
