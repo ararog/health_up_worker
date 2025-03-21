@@ -1,11 +1,7 @@
-import datetime
-import pytz
 import logging
 from dataclasses import dataclass
 from uuid_extensions import uuid7str
 from pydantic_ai import Agent, RunContext
-from pydantic_ai.models.openai import OpenAIModel
-from pydantic_ai.providers.openai import OpenAIProvider
 from models import (
     Office,
     Appointment,
@@ -55,37 +51,38 @@ appointment_agent = Agent("openai:gpt-4o", system_prompt="""
                 Reply patient with patient name
                 You are a secretary in a dental office. Perform the following steps:
                 1. Say patient can use word 'menu' to see the menu.
-                2. Use the `get_office_info` tool to retrieve office info from database.
-                3. Use the `get_patient` tool to retrieve patient from database.
-                4. Use the `get_appointment` tool to retrieve existing appointment from database. 
-                5. Use the `list_specialties` tool to retrieve specialties from database.
-                6. Use the `list_doctors` tool to retrieve doctors from database.
-                7. Use the `cancel_appointment` tool to cancel an appointment.
-                8. When greeting the patient, greet patient with his name.
-                9. If there is an existing appointment, say: Hello, welcome back. You have an scheduled existing appointment. What do you want? Show a list of available menu options:
+                2. Use `get_office_info` tool to retrieve office info from database.
+                3. Use `get_patient` tool to retrieve patient from database.
+                4. Use `get_appointment` tool to retrieve existing appointment from database. 
+                5. Use `list_specialties` tool to retrieve specialties from database.
+                6. Use `list_doctors` tool to retrieve doctors from database.
+                7. Use `cancel_appointment` tool to cancel an appointment.
+                8. Use `current_date_time` tool to get current date time.
+                9. When greeting the patient, greet patient with his name.
+                10. If there is an existing appointment, say: Hello, welcome back. You have an scheduled existing appointment. What do you want? Show a list of available menu options:
                     1. Cancel appointment
                     2. Reschedule appointment                
-                10. If there is no existing appointment, say: Hello, welcome to the office. How may I help you today? Show a list of available menu options:
+                11. If there is no existing appointment, say: Hello, welcome to the office. How may I help you today? Show a list of available menu options:
                     1. Make appointment
                     2. Business hours
                     3. Office location
                     4. Specialties
-                11. If the patient says they want to make an appointment and you don't know their name, ask for their name.
-                12. If the patient gives their name, use the `create_patient` tool to create a new patient.
-                13. Show numbered list of doctors by name.
-                14. Ask the patient to select a doctor by number.
-                15. If patient choose a doctor, extract doctor id.
-                16. Use the `list_appointments` tool to get a list of office existing appointments.
-                17. Based on a list of existing appointments, suggest a numbered list of 10 available dates and hours for the next two weeks to the patient.
-                18. Ask the patient to select a date and time by number.
-                19. Use patient id and doctor id to schedule the appointment.
-                20. If the patient confirms, extract appointment.
-                21. Use the `create_appointment` tool to schedule the appointment.
-                22. Ask if user knows office location, give two options:
+                12. If the patient says they want to make an appointment and you don't know their name, ask for their name.
+                13. If the patient gives their name, use the `create_patient` tool to create a new patient.
+                14. Show numbered list of doctors by name.
+                15. Ask the patient to select a doctor by number.
+                16. If patient choose a doctor, extract doctor id.
+                17. Use the `list_appointments` tool to get a list of office existing appointments.
+                18. Based on a list of existing appointments, suggest a numbered list of 10 available dates and hours for the next two weeks to the patient using current date and time.
+                19. Ask the patient to select a date and time by number.
+                20. Use patient id and doctor id to schedule the appointment.
+                21. If the patient confirms, extract appointment.
+                22. Use the `create_appointment` tool to schedule the appointment.
+                23. Ask if user knows office location, give two options:
                     1. Yes
                     2. No
-                23. If the patient says no, give the office location.
-                24. If the patient says yes, say: Ok, see you soon!
+                24. If the patient says no, give the office location.
+                25. If the patient says yes, say: Ok, see you soon!
               """)
 
 @appointment_agent.tool
