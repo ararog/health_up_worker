@@ -88,12 +88,6 @@ appointment_agent = Agent("openai:gpt-4o", system_prompt="""
                 24. If the patient says yes, say: Ok, see you soon!
               """)
 
-@appointment_agent.system_prompt
-def start_date_time() -> str:
-    logger.info("Add date and time...")
-    now = actual_date_time('America/Sao_Paulo')
-    return f"Current date and time is: {now.date_time}"
-
 @appointment_agent.tool
 def current_date_time(ctx: RunContext[AppointmentDependencies]) -> str:
     logger.info("Add date and time...")
